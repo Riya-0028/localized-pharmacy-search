@@ -17,22 +17,49 @@ filename='style.css') }}">
 
 <h1>Login</h1>
 
-<form action="/search">
+<form method="POST"
+action="/save_user">
 
 <input
-placeholder="Name">
+
+type="text"
+
+name="name"
+
+placeholder="Enter Name"
+
+required>
+
 
 <input
-placeholder="Place">
+
+type="text"
+
+name="place"
+
+placeholder="Enter Place"
+
+required>
+
 
 <input
-placeholder="Phone">
+
+type="text"
+
+name="phone"
+
+placeholder="Phone Number"
+
+required>
+
 
 <button>
 
 Continue
 
 </button>
+
+</form>
 
 </form>
 
