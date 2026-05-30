@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<link rel="stylesheet"
+href="{{ url_for('static',
+filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>
+Pharmacy Register
+</h1>
+
+<form
+method="POST"
+action="/save_pharmacy">
+
+<input
+name="name"
+placeholder="Pharmacy Name"
+required>
+
+<input
+name="address"
+placeholder="Address"
+required>
+
+<input
+name="place"
+placeholder="Place"
+required>
+
+<input
+name="contact"
+placeholder="Phone Number"
+required>
+
+<input
+name="username"
+placeholder="Username"
+required>
+
+<input
+type="password"
+name="password"
+placeholder="Password"
+required>
+
+<button>
+
+Register
+
+</button>
+
+</form>
+
+</div>
+
+</body>
+
+</html>
