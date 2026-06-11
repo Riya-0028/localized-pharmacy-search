@@ -1,51 +1,65 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
-<title>Pharmacy Finder</title>
-
-<link rel="stylesheet"
-href="{{ url_for('static',
-filename='style.css') }}">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Finder - Find Medicines Fast</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-
 <body>
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-pills"></i>
+                <span>Pharmacy Finder</span>
+            </div>
+            <div class="navbar-actions">
+                <a href="/login" class="nav-btn login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a href="/pharmacy_register" class="nav-btn register-pharmacy-btn">
+                    <i class="fas fa-hospital"></i> Register Pharmacy
+                </a>
+            </div>
+        </div>
+    </nav>
 
-<div class="card">
+    <!-- Main Dashboard -->
+    <div class="dashboard-container">
+        <div class="hero-section">
+            <h1 class="hero-title">
+                <i class="fas fa-heartbeat"></i> Pharmacy Finder
+            </h1>
+            <p class="hero-subtitle">Find medicines faster. Compare prices. Save more.</p>
+            
+            <div class="hero-content">
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <form action="/results" method="POST" class="search-form">
+                            <input 
+                                type="text" 
+                                name="medicine" 
+                                placeholder="Search for medicines..." 
+                                class="search-input"
+                                required
+                            >
+                            <button type="submit" class="search-btn">
+                                <i class="fas fa-arrow-right"></i> Search
+                            </button>
+                        </form>
+                    </div>
+                    <p class="search-hint">Search from thousands of medicines available in nearby pharmacies</p>
+                </div>
+            </div>
+        </div>
 
-<h1>
-Pharmacy Inventory Search
-</h1>
-
-<p>
-Find medicines faster.
-</p>
-
-<a href="/login">
-
-<button>
-Login
-</button>
-
-</a>
-
-<br><br>
-
-<a href="/search">
-
-<button class="guest">
-
-Emergency Guest Search
-
-</button>
-
-</a>
-
-</div>
-
+        <!-- Footer -->
+        <div class="footer-section">
+            <p>&copy; 2026 Pharmacy Finder. Your trusted medicine search platform.</p>
+        </div>
+    </div>
 </body>
-
 </html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Pending - Pharmacy Finder</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-pills"></i>
+                <span>Pharmacy Finder</span>
+            </div>
+            <div class="navbar-actions">
+                <a href="/" class="nav-btn login-btn">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="form-container" style="max-width: 600px;">
+            <div style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 80px; color: #ff9800; margin-bottom: 20px; animation: float 3s ease-in-out infinite;">
+                    <i class="fas fa-clock"></i>
+                </div>
+                
+                <h1 style="font-size: 32px; margin-bottom: 15px; color: white;">
+                    Registration Pending
+                </h1>
+
+                <p style="font-size: 18px; margin-bottom: 30px; line-height: 1.6; opacity: 0.95;">
+                    Thank you for registering your pharmacy! 🎉
+                </p>
+
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 15px; margin-bottom: 30px; border-left: 4px solid #ff9800;">
+                    <h3 style="margin-bottom: 15px; color: #ffc107;">What happens next?</h3>
+                    <ul style="text-align: left; margin: 0; padding-left: 20px;">
+                        <li style="margin-bottom: 12px; opacity: 0.9;">
+                            <strong>License Verification:</strong> Our admin team will verify your pharmacy license number
+                        </li>
+                        <li style="margin-bottom: 12px; opacity: 0.9;">
+                            <strong>Approval Process:</strong> This usually takes 24-48 hours
+                        </li>
+                        <li style="margin-bottom: 12px; opacity: 0.9;">
+                            <strong>Email Notification:</strong> You'll receive an email once your pharmacy is approved
+                        </li>
+                        <li style="opacity: 0.9;">
+                            <strong>Login Available:</strong> Once approved, you can log in and start managing your inventory
+                        </li>
+                    </ul>
+                </div>
+
+                <p style="margin-bottom: 20px; opacity: 0.8;">
+                    <strong>Your License Number:</strong><br>
+                    <span style="font-size: 16px; color: #43a047; word-break: break-all;">{{ request.form.get('license', 'In Processing') }}</span>
+                </p>
+
+                <div style="margin: 30px 0;">
+                    <a href="/" class="btn btn-primary" style="margin-right: 10px;">
+                        <i class="fas fa-home"></i> Back to Home
+                    </a>
+                    <a href="/pharmacy_login" class="btn btn-info">
+                        <i class="fas fa-sign-in-alt"></i> Try Login
+                    </a>
+                </div>
+
+                <p style="margin-top: 25px; padding-top: 25px; border-top: 1px solid rgba(255, 255, 255, 0.2); opacity: 0.7; font-size: 14px;">
+                    Have questions? Contact our support team at support@pharmacyfinder.com
+                </p>
+            </div>
+        </div>
+
+        <div class="footer-section">
+            <p>&copy; 2026 Pharmacy Finder. Your trusted medicine search platform.</p>
+        </div>
+    </div>
+
+    <style>
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</body>
+</html>

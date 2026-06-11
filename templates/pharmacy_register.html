@@ -1,68 +1,122 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
-<link rel="stylesheet"
-href="{{ url_for('static',
-filename='style.css') }}">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Pharmacy - Pharmacy Finder</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-
 <body>
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-pills"></i>
+                <span>Pharmacy Finder</span>
+            </div>
+            <div class="navbar-actions">
+                <a href="/" class="nav-btn login-btn">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+        </div>
+    </nav>
 
-<div class="card">
+    <div class="dashboard-container">
+        <div class="form-container">
+            <h1>
+                <i class="fas fa-hospital"></i> Register Your Pharmacy
+            </h1>
+            <p style="text-align: center; margin-bottom: 30px; opacity: 0.9;">
+                Fill in your pharmacy details. Your license will be verified by our admin team.
+            </p>
 
-<h1>
-Pharmacy Register
-</h1>
+            <form method="POST" action="/save_pharmacy">
+                <div class="form-group">
+                    <label for="name">Pharmacy Name <span style="color: #ff6b35;">*</span></label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Enter pharmacy name"
+                        required>
+                </div>
 
-<form
-method="POST"
-action="/save_pharmacy">
+                <div class="form-group">
+                    <label for="address">Street Address <span style="color: #ff6b35;">*</span></label>
+                    <input
+                        type="text"
+                        id="address"
+                        name="address"
+                        placeholder="Enter complete address"
+                        required>
+                </div>
 
-<input
-name="name"
-placeholder="Pharmacy Name"
-required>
+                <div class="form-group">
+                    <label for="place">City/Place <span style="color: #ff6b35;">*</span></label>
+                    <input
+                        type="text"
+                        id="place"
+                        name="place"
+                        placeholder="Enter city or place"
+                        required>
+                </div>
 
-<input
-name="address"
-placeholder="Address"
-required>
+                <div class="form-group">
+                    <label for="contact">Contact Number <span style="color: #ff6b35;">*</span></label>
+                    <input
+                        type="tel"
+                        id="contact"
+                        name="contact"
+                        placeholder="Enter 10-digit phone number"
+                        pattern="[0-9]{10}"
+                        required>
+                </div>
 
-<input
-name="place"
-placeholder="Place"
-required>
+                <div class="form-group">
+                    <label for="license">Pharmacy License Number <span style="color: #ff6b35;">*</span></label>
+                    <input
+                        type="text"
+                        id="license"
+                        name="license"
+                        placeholder="Enter pharmacy license number"
+                        required>
+                </div>
 
-<input
-name="contact"
-placeholder="Phone Number"
-required>
+                <div class="form-group">
+                    <label for="username">Username <span style="color: #ff6b35;">*</span></label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Create a username"
+                        required>
+                </div>
 
-<input
-name="username"
-placeholder="Username"
-required>
+                <div class="form-group">
+                    <label for="password">Password <span style="color: #ff6b35;">*</span></label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Create a strong password"
+                        required>
+                </div>
 
-<input
-type="password"
-name="password"
-placeholder="Password"
-required>
+                <button type="submit" class="form-submit">
+                    <i class="fas fa-check"></i> Register Pharmacy
+                </button>
+            </form>
 
-<button>
+            <p style="text-align: center; margin-top: 20px; font-size: 13px; opacity: 0.8;">
+                Already registered? <a href="/pharmacy_login" style="color: #43a047; text-decoration: none; font-weight: 600;">Login here</a>
+            </p>
+        </div>
 
-Register
-
-</button>
-
-</form>
-
-</div>
-
+        <div class="footer-section">
+            <p>&copy; 2026 Pharmacy Finder. Your trusted medicine search platform.</p>
+        </div>
+    </div>
 </body>
-
 </html>
