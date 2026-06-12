@@ -11,13 +11,18 @@
     <!-- Navigation Header -->
     <nav class="navbar">
         <div class="navbar-container">
-            <div class="navbar-brand">
-                <i class="fas fa-pills"></i>
-                <span>Pharmacy Finder</span>
+            <div style="display: flex; align-items: center;">
+                <a href="javascript:history.back()" class="back-arrow" title="Go Back">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="navbar-brand">
+                    <i class="fas fa-pills"></i>
+                    <span>Pharmacy Finder</span>
+                </div>
             </div>
             <div class="navbar-actions">
-                <a href="/login" class="nav-btn login-btn">
-                    <i class="fas fa-sign-in-alt"></i> Login
+                <a href="/#signup-section" class="nav-btn signin-btn">
+                    <i class="fas fa-user-plus"></i> Sign In
                 </a>
                 <a href="/pharmacy_register" class="nav-btn register-pharmacy-btn">
                     <i class="fas fa-hospital"></i> Register Pharmacy
@@ -42,10 +47,13 @@
                             <input 
                                 type="text" 
                                 name="medicine" 
+                                id="medicine-input"
                                 placeholder="Search for medicines..." 
                                 class="search-input"
                                 required
                             >
+                            <i class="fas fa-times clear-btn" 
+                               onclick="document.getElementById('medicine-input').value = ''" title="Clear search"></i>
                             <button type="submit" class="search-btn">
                                 <i class="fas fa-arrow-right"></i> Search
                             </button>
@@ -57,6 +65,48 @@
         </div>
 
         <!-- Footer -->
+         </div> <div id="signup-section" style="max-width: 450px; margin: 60px auto; padding: 30px; background-color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 12px; font-family: sans-serif;">
+            <h2 style="text-align: center; color: #1976d2; margin-bottom: 5px;"><i class="fas fa-user-plus"></i> Create Account / Sign In</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 25px; font-size: 14px;">Enter your details to register as a user and start searching</p>
+            
+            <form action="/save_user" method="POST">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333; font-size: 14px;">Full Name</label>
+                    <input type="text" name="name" required placeholder="Enter your full name" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333; font-size: 14px;">Place / Location</label>
+                    <input type="text" name="place" required placeholder="e.g., Mangalore" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+                </div>
+                
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #333; font-size: 14px;">Phone Number</label>
+                    <input type="text" name="phone" required placeholder="Enter 10-digit phone number" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+                </div>
+                
+                <button type="submit" style="width: 100%; padding: 12px; background-color: #1976d2; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s;">
+                    Sign In
+                </button>
+            </form>
+
+            <p style="text-align: center; margin-top: 20px; color: #555; font-size: 14px; margin-bottom: 0;">
+                If you already have an account, <a href="/login" style="color: #1976d2; font-weight: bold; text-decoration: none;">Login here</a>.
+            </p>
+        </div>
+        <div class="footer-section">
+            <p>&copy; 2026 Pharmacy Finder. Your trusted medicine search platform.</p>
+        </div>
+    </div> ```
+
+---
+
+### 🏎️ Why this sets up your flow cleanly:
+* Since the container id is explicitly set to `id="signup-section"`, clicking **"Sign In"** in your nav bar will now smoothly snap scroll the window straight down to this input form.
+* When a completely new user fills this out and hits the "Sign In" button, it routes to `/save_user`, writes them into your database, and smoothly moves them to your main search area.
+* If they already have an account, clicking **"Login here"** smoothly takes them to your clean `login.html` form page. 
+
+Save your `welcome.html` file now and test it in your browser—the complete look will be right there!
         <div class="footer-section">
             <p>&copy; 2026 Pharmacy Finder. Your trusted medicine search platform.</p>
         </div>

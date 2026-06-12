@@ -49,7 +49,7 @@
             </h1>
 
             {% if message %}
-                <div style="background: {% if error %}rgba(244, 67, 54, 0.2){% else %}rgba(76, 175, 80, 0.2){% endif %}; border: 1px solid {% if error %}#f44336{% else %}#4caf50{% endif %}; border-radius: 8px; padding: 15px; margin-bottom: 20px; color: {% if error %}#ffcdd2{% else %}#c8e6c9{% endif %}; text-align: center; font-weight: 500;">
+                <div class="alert-message {% if error %}alert-error{% else %}alert-success{% endif %}">
                     <i class="fas fa-{% if error %}exclamation-circle{% else %}check-circle{% endif %}"></i> {{ message }}
                 </div>
             {% endif %}

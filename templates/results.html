@@ -38,28 +38,27 @@
                     
                     <div class="pharmacies-grid">
                         {% for pharmacy in pharmacies %}
-                            <div class="pharmacy-card">
-                                <div class="pharmacy-header">
-                                    <h2>{{ pharmacy[1] }}</h2>
-                                    <span class="stock-badge">
-                                        {% if pharmacy[5] > 0 %}
-                                            <i class="fas fa-check-circle"></i> In Stock ({{ pharmacy[5] }})
-                                        {% else %}
-                                            <i class="fas fa-times-circle"></i> Out of Stock
-                                        {% endif %}
-                                    </span>
-                                </div>
-                                <div class="pharmacy-details">
-                                    <p><i class="fas fa-map-marker-alt"></i> {{ pharmacy[2] }}, {{ pharmacy[3] }}</p>
-                                    <p><i class="fas fa-phone"></i> {{ pharmacy[4] }}</p>
-                                </div>
-                                <div class="pharmacy-actions">
-                                    <button class="btn btn-primary">
-                                        <i class="fas fa-shopping-cart"></i> Reserve
-                                    </button>
-                                </div>
-                            </div>
-                        {% endfor %}
+    <div class="pharmacy-card">
+        <div class="pharmacy-header">
+            <h2>{{ pharmacy.pharmacy_name }}</h2>
+            <span class="stock-badge">
+                {% if pharmacy.quantity > 0 %}
+                    <i class="fas fa-check-circle"></i> In Stock ({{ pharmacy.quantity }})
+                {% else %}
+                    <i class="fas fa-times-circle"></i> Out of Stock
+                {% endif %}
+            </span>
+        </div>
+        <div class="pharmacy-details">
+            <p><i class="fas fa-map-marker-alt"></i> {{ pharmacy.address }}</p>
+        </div>
+        <div class="pharmacy-actions">
+            <button class="btn btn-primary">
+                <i class="fas fa-shopping-cart"></i> Reserve
+            </button>
+        </div>
+    </div>
+{% endfor %}
                     </div>
                 {% else %}
                     <div class="no-results">
