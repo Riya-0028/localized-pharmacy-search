@@ -1,44 +1,17 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
-<link rel="stylesheet"
-
-href="{{ url_for('static',
-filename='style.css') }}">
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-
-<div class="card">
-
-<h1>
-
-Search Medicine
-
-</h1>
-
-<form action="/results" method="POST">
-
-<input
-
-name="medicine"
-placeholder="Search medicine"
-required>
-
-<button>
-
-Search
-
-</button>
-
-</form>
-
-</div>
-
+    <div class="card">
+        <h1>Search Medicine</h1>
+        
+        <form action="/user_results" method="POST">
+            <input name="medicine" placeholder="Search medicine" required>
+            <button>Search</button>
+        </form>
+        
+    </div>
 </body>
-
 </html>
