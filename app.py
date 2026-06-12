@@ -257,32 +257,42 @@ def pharmacy_dashboard():
     try:
         local_cursor = db.cursor(dictionary=True)
 
-        # Fetch all inventory items for this specific pharmacy
-        inventory_query = """
-            SELECT M.medicine_name, M.generic_name, I.quantity 
-            FROM inventory I 
-            JOIN medicine M ON I.medicine_id = M.medicine_id 
-            WHERE I.pharmacy_id = %s
-        """
-        local_cursor.execute(inventory_query, (pharmacy_id,))
-        inventory = local_cursor.fetchall()
+        # 📊 1. Count distinct medicine listings in inventory
+        local_cursor.execute("SELECT COUNT(*) AS total FROM inventory WHERE pharmacy_id = %s", (pharmacy_id,))
+        med_count = local_cursor.fetchone()['total']
 
-        # Fetch low stock alerts (items with quantity less than 5)
-        alerts_query = """
-            SELECT M.medicine_name, M.generic_name, I.quantity 
-            FROM inventory I 
-            JOIN medicine M ON I.medicine_id = M.medicine_id 
-            WHERE I.pharmacy_id = %s AND I.quantity < 5
-        """
-        local_cursor.execute(alerts_query, (pharmacy_id,))
-        alerts = local_cursor.fetchall()
+        # 📊 2. Count real completed or active orders from the orders table
+        local_cursor.execute("SELECT COUNT(*) AS total FROM orders WHERE pharmacy_id = %s", (pharmacy_id,))
+        sales_count = local_cursor.fetchone()['total']
 
+        # 📊 3. Count unique customers who have interacted with this shop
+        local_cursor.execute("SELECT COUNT(DISTINCT user_id) AS total FROM orders WHERE pharmacy_id = %s", (pharmacy_id,))
+        customer_count = local_cursor.fetchone()['total']
+
+        # 📋 REAL DATA QUERY: Pull live rows from the orders table joined with user details!
+        query = """
+            SELECT O.order_id, O.medicine_name, O.booking_type, O.status, U.name AS customer_name 
+            FROM orders O
+            JOIN users U ON O.user_id = U.user_id
+            WHERE O.pharmacy_id = %s
+            ORDER BY O.created_at DESC
+        """
+        local_cursor.execute(query, (pharmacy_id,))
+        recent_requests = local_cursor.fetchall()
+        
         local_cursor.close()
-        return render_template("pharmacy_dashboard.html", pharmacy_name=pharmacy_name, inventory=inventory, alerts=alerts)
+        
+        return render_template(
+            "pharmacy_dashboard.html", 
+            pharmacy_name=pharmacy_name, 
+            med_count=med_count, 
+            sales_count=sales_count, 
+            customer_count=customer_count,
+            recent_requests=recent_requests
+        )
     except Exception as e:
-        print(f"Dashboard Error: {e}")
-        return "An error occurred loading the dashboard."
-
+        print(f"Dashboard Metrics Error: {e}")
+        return f"An error occurred loading dashboard data: {e}"
 @app.route("/admin_dashboard")
 def admin_dashboard():
     try:
@@ -397,8 +407,188 @@ def view_inventory():
         
     except Exception as e:
         print(f"Inventory View Error: {e}")
-        return f"Failed to retrieve stock records: {e}"    
+        return f"Failed to retrieve stock records: {e}"   
+@app.route("/action_reserve", methods=["POST"])
+def action_reserve():
+    if 'user_id' not in session:
+        return redirect("/login")
+        
+    user_id = session['user_id']
+    medicine = request.form.get("medicine_name")
+    pharmacy_id = request.form.get("pharmacy_id")
+    
+    try:
+        local_cursor = db.cursor()
+        sql = """
+            INSERT INTO orders (user_id, pharmacy_id, medicine_name, booking_type, status) 
+            VALUES (%s, %s, %s, 'Reserve', 'Awaiting Action')
+        """
+        local_cursor.execute(sql, (user_id, pharmacy_id, medicine))
+        db.commit()
+        local_cursor.close()
+        
+        # 🎨 Beautiful HTML Design Return Block
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <link rel="stylesheet" href="/static/style.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        </head>
+        <body>
+            <div class="dashboard-container" style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+                <div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 20px; padding: 40px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); max-width: 500px; width: 100%; text-align: center; color: white; font-family: sans-serif;">
+                    <div style="font-size: 65px; color: #4caf50; margin-bottom: 20px;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2 style="margin-bottom: 10px; font-weight: bold; color: white;">Reservation Confirmed!</h2>
+                    <p style="opacity: 0.9; font-size: 15px; margin-bottom: 25px; line-height: 1.6;">
+                        Great news! <strong>{medicine}</strong> has been successfully reserved under your name for local counter pickup. The pharmacy storefront has been instantly alerted to lock down your stock.
+                    </p>
+                    
+                    <div style="background: rgba(0,0,0,0.15); padding: 15px; border-radius: 8px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1); text-align: left; font-size: 14px;">
+                        <p style="margin: 0 0 8px 0;"><i class="fas fa-pills" style="color: #ffc107; margin-right: 8px;"></i> <strong>Item:</strong> {medicine}</p>
+                        <p style="margin: 0;"><i class="fas fa-hand-holding-medical" style="color: #03a9f4; margin-right: 8px;"></i> <strong>Fulfillment:</strong> Walk-in Store Pickup</p>
+                    </div>
+
+                    <a href="/search" class="btn btn-primary" style="text-decoration: none; display: inline-block; width: 100%; padding: 12px; background: #1976d2; color: white; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 12px rgba(25,118,210,0.3);">
+                        <i class="fas fa-arrow-left"></i> Back to Search Dashboard
+                    </a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+    except Exception as e:
+        print(f"Reservation Error: {e}")
+        return f"Failed to process reservation: {e}"
 
 
+@app.route("/action_order", methods=["POST"])
+def action_order():
+    if 'user_id' not in session:
+        return redirect("/login")
+        
+    user_id = session['user_id']
+    medicine = request.form.get("medicine_name")
+    pharmacy_id = request.form.get("pharmacy_id")
+    
+    try:
+        local_cursor = db.cursor()
+        sql = """
+            INSERT INTO orders (user_id, pharmacy_id, medicine_name, booking_type, status) 
+            VALUES (%s, %s, %s, 'Delivery', 'Awaiting Action')
+        """
+        local_cursor.execute(sql, (user_id, pharmacy_id, medicine))
+        db.commit()
+        local_cursor.close()
+        
+        # 🎨 Beautiful HTML Design Return Block
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <link rel="stylesheet" href="/static/style.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        </head>
+        <body>
+            <div class="dashboard-container" style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+                <div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 20px; padding: 40px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); max-width: 500px; width: 100%; text-align: center; color: white; font-family: sans-serif;">
+                    <div style="font-size: 65px; color: #2e7d32; margin-bottom: 20px;">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h2 style="margin-bottom: 10px; font-weight: bold; color: white;">Order Dispatched!</h2>
+                    <p style="opacity: 0.9; font-size: 15px; margin-bottom: 25px; line-height: 1.6;">
+                        Success! Your order for <strong>{medicine}</strong> has been logged. The pharmacy team is currently preparing your package for Home Delivery, and an agent will move out shortly.
+                    </p>
+                    
+                    <div style="background: rgba(0,0,0,0.15); padding: 15px; border-radius: 8px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1); text-align: left; font-size: 14px;">
+                        <p style="margin: 0 0 8px 0;"><i class="fas fa-pills" style="color: #ffc107; margin-right: 8px;"></i> <strong>Item:</strong> {medicine}</p>
+                        <p style="margin: 0;"><i class="fas fa-truck" style="color: #4caf50; margin-right: 8px;"></i> <strong>Fulfillment:</strong> Home Delivery Logistic</p>
+                    </div>
+
+                    <a href="/search" class="btn btn-primary" style="text-decoration: none; display: inline-block; width: 100%; padding: 12px; background: #2e7d32; color: white; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 12px rgba(46,125,50,0.3);">
+                        <i class="fas fa-arrow-left"></i> Back to Search Dashboard
+                    </a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+    except Exception as e:
+        print(f"Ordering Error: {e}")
+        return f"Failed to process delivery order: {e}"  
+@app.route("/confirm_dispatch", methods=["POST"])
+def confirm_dispatch():
+    if 'pharmacy_id' not in session:
+        return redirect("/pharmacy_login")
+        
+    order_id = request.form.get("order_id")
+    
+    try:
+        local_cursor = db.cursor()
+        
+        # 🔄 Update the status of this specific order entry in our database
+        sql = "UPDATE orders SET status = 'Dispatched' WHERE order_id = %s"
+        local_cursor.execute(sql, (order_id,))
+        db.commit()
+        
+        local_cursor.close()
+        # 🔄 Refresh the dashboard page instantly to show the updated state!
+        return redirect("/pharmacy_dashboard")
+        
+    except Exception as e:
+        print(f"Dispatch Error: {e}")
+        return f"Failed to finalize dispatch operation: {e}"  
+
+@app.route("/pharmacy_settings")
+def pharmacy_settings():
+    if 'pharmacy_id' not in session:
+        return redirect("/pharmacy_login")
+        
+    pharmacy_id = session['pharmacy_id']
+    
+    try:
+        local_cursor = db.cursor(dictionary=True)
+        # 🌟 FIX: Changed pharmacy_name to name to match your MySQL structure!
+        local_cursor.execute("SELECT name, location, phone FROM pharmacy WHERE pharmacy_id = %s", (pharmacy_id,))
+        profile_data = local_cursor.fetchone()
+        local_cursor.close()
+        
+        return render_template("pharmacy_settings.html", profile=profile_data)
+    except Exception as e:
+        print(f"Settings Load Error: {e}")
+        return "Failed to load configuration settings."
+
+
+@app.route("/save_pharmacy_settings", methods=["POST"])
+def save_pharmacy_settings():
+    if 'pharmacy_id' not in session:
+        return redirect("/pharmacy_login")
+        
+    pharmacy_id = session['pharmacy_id']
+    new_name = request.form.get("pharmacy_name").strip()
+    new_location = request.form.get("location").strip()
+    new_phone = request.form.get("phone").strip()
+    
+    try:
+        local_cursor = db.cursor()
+        # 🌟 FIX: Changed pharmacy_name = %s to name = %s here too!
+        sql = """
+            UPDATE pharmacy 
+            SET name = %s, location = %s, phone = %s 
+            WHERE pharmacy_id = %s
+        """
+        local_cursor.execute(sql, (new_name, new_location, new_phone, pharmacy_id))
+        db.commit()
+        local_cursor.close()
+        
+        # Update the session variable immediately so the header changes too!
+        session['pharmacy_name'] = new_name
+        
+        return redirect("/pharmacy_dashboard")
+    except Exception as e:
+        print(f"Settings Save Error: {e}")
+        return "Failed to update profile configurations."
 if __name__=="__main__":
     app.run(debug=True)
