@@ -2,70 +2,95 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Stock Inventory Ledger</title>
+    <title>Pharmacy Inventory Management</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <div class="dashboard-container">
-        <div style="max-width: 1000px; width: 100%; margin: 40px auto; padding: 0 20px;">
-            
-            <div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 20px; padding: 40px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); color: white;">
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px;">
-                    <h2 style="margin: 0; color: white;">
-                        <i class="fas fa-boxes" style="color: #ff9800;"></i> {{ pharmacy_name }} Stock Inventory
-                    </h2>
-                    <a href="/pharmacy_dashboard" class="btn btn-primary" style="text-decoration: none; padding: 8px 16px; background-color: rgba(255,255,255,0.2); border: 1px solid white; color: white; border-radius: 6px; font-weight: bold; font-size: 14px;">
-                        <i class="fas fa-arrow-left"></i> Back to Dashboard
-                    </a>
-                </div>
+<body style="background: #121212; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; padding: 40px;">
 
-                {% if inventory %}
-                    <div style="overflow-x: auto; background: rgba(0, 0, 0, 0.2); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
-                        <table style="width: 100%; border-collapse: collapse; text-align: left; color: white;">
-                            <thead style="background: rgba(255,255,255,0.1); border-bottom: 2px solid rgba(255,255,255,0.2);">
-                                <tr>
-                                    <th style="padding: 15px;">Medicine Name</th>
-                                    <th style="padding: 15px;">Chemical Formulation / Generic</th>
-                                    <th style="padding: 15px; text-align: center;">Current Stock Levels</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in inventory %}
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); transition: background 0.2s;">
-                                        <td style="padding: 15px; font-weight: bold; color: #fff;">{{ item.medicine_name }}</td>
-                                        <td style="padding: 15px; color: #e0e0e0; font-style: italic;">{{ item.generic_name }}</td>
-                                        <td style="padding: 15px; text-align: center;">
-                                            {% if item.quantity < 10 %}
-                                                <span style="padding: 4px 10px; background: #c62828; color: white; border-radius: 4px; font-weight: bold; font-size: 13px;">
-                                                    ⚠️ Low Stock: {{ item.quantity }} units
-                                                </span>
-                                            {% else %}
-                                                <span style="padding: 4px 10px; background: #2e7d32; color: white; border-radius: 4px; font-weight: bold; font-size: 13px;">
-                                                    {{ item.quantity }} units
-                                                </span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div style="text-align: center; padding: 40px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.3);">
-                        <i class="fas fa-box-open fa-3x" style="color: rgba(255,255,255,0.4); margin-bottom: 15px;"></i>
-                        <h4 style="margin-bottom: 5px;">Your warehouse is completely empty!</h4>
-                        <p style="opacity: 0.7; margin-bottom: 20px;">You haven't uploaded any medical assets to your profile yet.</p>
-                        <a href="/add_medicine" class="btn btn-primary" style="text-decoration: none; padding: 10px 20px; background-color: #1976d2; color: white; border-radius: 6px; font-weight: bold;">
-                            <i class="fas fa-plus"></i> Add Your First Asset
-                        </a>
-                    </div>
-                {% endif %}
-
-            </div>
+    <div style="max-width: 1100px; margin: 0 auto;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2><i class="fas fa-boxes" style="color: #0288d1;"></i> Live Pharmacy Inventory</h2>
+            <a href="/pharmacy_dashboard" style="text-decoration: none; padding: 10px 20px; background: rgba(255,255,255,0.1); color: white; border-radius: 6px; font-weight: bold; font-size: 14px; border: 1px solid rgba(255,255,255,0.2);">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
         </div>
+
+        <div style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 25px; margin-bottom: 40px;">
+            <h3 style="margin-top: 0; margin-bottom: 20px; color: #4caf50; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-check-circle"></i> In-Stock Medicines
+            </h3>
+            
+            {% if active_stock %}
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead style="background: rgba(255,255,255,0.1); border-bottom: 2px solid rgba(255,255,255,0.2);">
+                        <tr>
+                            <th style="padding: 12px;">Medicine Name</th>
+                            <th style="padding: 12px;">Generic Classification</th>
+                            <th style="padding: 12px;">Stock Volume</th>
+                            <th style="padding: 12px;"><i class="fas fa-calendar-times" style="color: #ff9800;"></i> Expiry Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in active_stock %}
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td style="padding: 12px; font-weight: bold;">{{ item.medicine_name }}</td>
+                                <td style="padding: 12px; opacity: 0.8;">{{ item.generic_name }}</td>
+                                <td style="padding: 12px;"><span style="padding: 4px 10px; background: rgba(76,175,80,0.2); color: #81c784; border-radius: 20px; font-weight: bold;">{{ item.quantity }} units</span></td>
+                                <td style="padding: 12px; color: #ffb74d; font-weight: 500;">
+                                    {{ item.expiry_date if item.expiry_date else 'Not Configured' }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="opacity: 0.6; font-style: italic; text-align: center; padding: 20px; margin: 0;">No active stock registered at this storefront.</p>
+            {% endif %}
+        </div>
+
+
+        <div style="background: rgba(239, 83, 80, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(239, 83, 80, 0.2); border-radius: 12px; padding: 25px;">
+            <h3 style="margin-top: 0; margin-bottom: 20px; color: #ef5350; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-exclamation-triangle animate-pulse"></i> Critical Out-of-Stock Warnings
+            </h3>
+            
+            {% if out_of_stock %}
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead style="background: rgba(239, 83, 80, 0.1); border-bottom: 2px solid rgba(239, 83, 80, 0.3);">
+                        <tr>
+                            <th style="padding: 12px;">Depleted Medicine</th>
+                            <th style="padding: 12px;">Generic Classification</th>
+                            <th style="padding: 12px;">Status Badge</th>
+                            <th style="padding: 12px;">Last Recorded Expiry</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in out_of_stock %}
+                            <tr style="border-bottom: 1px solid rgba(239,83,80,0.1);">
+                                <td style="padding: 12px; font-weight: bold; opacity: 0.6;">{{ item.medicine_name }}</td>
+                                <td style="padding: 12px; opacity: 0.5; font-style: italic;">{{ item.generic_name }}</td>
+                                <td style="padding: 12px;">
+                                    <span style="padding: 3px 8px; background: #ffebee; color: #c62828; border-radius: 4px; font-weight: bold; font-size: 11px; text-transform: uppercase;">
+                                        Needs Restock
+                                    </span>
+                                </td>
+                                <td style="padding: 12px; opacity: 0.5;">
+                                    {{ item.expiry_date if item.expiry_date else 'N/A' }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="color: #81c784; font-style: italic; text-align: center; padding: 20px; margin: 0;">
+                    <i class="fas fa-check-double"></i> Excellent! All registered medicines currently have active stock.
+                </p>
+            {% endif %}
+        </div>
+
     </div>
+
 </body>
 </html>

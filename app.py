@@ -330,12 +330,55 @@ def approve_pharmacy(pharmacy_id):
     except Exception as e:
         print(f"Approval Error: {e}")
         return "Failed to approve pharmacy."
-@app.route("/add_medicine")
+# 🌟 Replace your existing add medicine POST route with this updated version:
+# 🌟 FIX: Added ["GET", "POST"] to methods so it can display the form AND save data!
+@app.route("/add_medicine", methods=["GET", "POST"])
 def add_medicine():
     if 'pharmacy_id' not in session:
         return redirect("/pharmacy_login")
-    return render_template("add_medicine.html")
+        
+    pharmacy_id = session['pharmacy_id']
 
+    # 1. If the user just clicked the button to VIEW the form page
+    if request.method == "GET":
+        return render_template("add_medicine.html") # Make sure your HTML file name matches this exactly!
+
+    # 2. If the user filled out the form and clicked "Save to Inventory" (POST)
+    if request.method == "POST":
+        med_name = request.form.get("medicine_name").strip()
+        generic_name = request.form.get("generic_name").strip()
+        quantity = request.form.get("quantity")
+        expiry_date = request.form.get("expiry_date")
+
+        try:
+            local_cursor = db.cursor()
+            
+            # Check if medicine catalog already knows this brand
+            local_cursor.execute("SELECT medicine_id FROM medicine WHERE medicine_name = %s", (med_name,))
+            result = local_cursor.fetchone()
+            
+            if result:
+                # If using dictionary=True cursor, use result['medicine_id'] instead of result[0]
+                medicine_id = result['medicine_id'] if isinstance(result, dict) else result[0]
+            else:
+                local_cursor.execute("INSERT INTO medicine (medicine_name, generic_name) VALUES (%s, %s)", (med_name, generic_name))
+                db.commit()
+                medicine_id = local_cursor.lastrowid
+
+            # Insert link record with the brand-new expiry date tracker variable
+            sql = """
+                INSERT INTO inventory (pharmacy_id, medicine_id, quantity, expiry_date) 
+                VALUES (%s, %s, %s, %s)
+            """
+            local_cursor.execute(sql, (pharmacy_id, medicine_id, quantity, expiry_date))
+            db.commit()
+            
+            local_cursor.close()
+            return redirect("/pharmacy_dashboard")
+            
+        except Exception as e:
+            print(f"Error adding stock asset: {e}")
+            return f"Failed to log new inventory record: {e}"
 
 @app.route("/save_new_medicine", methods=["POST"])
 def save_new_medicine():
@@ -386,28 +429,40 @@ def view_inventory():
         return redirect("/pharmacy_login")
         
     pharmacy_id = session['pharmacy_id']
-    pharmacy_name = session['pharmacy_name']
     
     try:
         local_cursor = db.cursor(dictionary=True)
         
-        # 🔍 Fetches all medicine items and stock numbers logged under this specific shop ID
-        query = """
-            SELECT M.medicine_name, M.generic_name, I.quantity 
-            FROM inventory I 
-            JOIN medicine M ON I.medicine_id = M.medicine_id 
-            WHERE I.pharmacy_id = %s
-            ORDER BY M.medicine_name ASC
+        # 🟢 1. FETCH ACTIVE STOCK: Items that are currently available (Quantity > 0)
+        active_query = """
+            SELECT I.inventory_id, M.medicine_name, M.generic_name, I.quantity, I.expiry_date 
+            FROM inventory I
+            JOIN medicine M ON I.medicine_id = M.medicine_id
+            WHERE I.pharmacy_id = %s AND I.quantity > 0
         """
-        local_cursor.execute(query, (pharmacy_id,))
-        my_stock = local_cursor.fetchall()
+        local_cursor.execute(active_query, (pharmacy_id,))
+        active_stock = local_cursor.fetchall()
+        
+        # 🔴 2. FETCH OUT OF STOCK: Items that have run out completely (Quantity = 0)
+        out_of_stock_query = """
+            SELECT I.inventory_id, M.medicine_name, M.generic_name, I.expiry_date 
+            FROM inventory I
+            JOIN medicine M ON I.medicine_id = M.medicine_id
+            WHERE I.pharmacy_id = %s AND I.quantity = 0
+        """
+        local_cursor.execute(out_of_stock_query, (pharmacy_id,))
+        out_of_stock = local_cursor.fetchall()
+        
         local_cursor.close()
         
-        return render_template("view_inventory.html", pharmacy_name=pharmacy_name, inventory=my_stock)
-        
+        return render_template(
+            "view_inventory.html", 
+            active_stock=active_stock, 
+            out_of_stock=out_of_stock
+        )
     except Exception as e:
-        print(f"Inventory View Error: {e}")
-        return f"Failed to retrieve stock records: {e}"   
+        print(f"Inventory Load Error: {e}")
+        return f"An error occurred loading inventory data: {e}"
 @app.route("/action_reserve", methods=["POST"])
 def action_reserve():
     if 'user_id' not in session:
@@ -550,15 +605,15 @@ def pharmacy_settings():
     
     try:
         local_cursor = db.cursor(dictionary=True)
-        # 🌟 FIX: Changed pharmacy_name to name to match your MySQL structure!
-        local_cursor.execute("SELECT name, location, phone FROM pharmacy WHERE pharmacy_id = %s", (pharmacy_id,))
+        # 🛡️ FOOLPROOF: Removed phone entirely from the query so it never throws a 1054 error again!
+        local_cursor.execute("SELECT name, place FROM pharmacy WHERE pharmacy_id = %s", (pharmacy_id,))
         profile_data = local_cursor.fetchone()
         local_cursor.close()
         
         return render_template("pharmacy_settings.html", profile=profile_data)
     except Exception as e:
         print(f"Settings Load Error: {e}")
-        return "Failed to load configuration settings."
+        return f"Failed to load settings: {e}"
 
 
 @app.route("/save_pharmacy_settings", methods=["POST"])
@@ -568,27 +623,24 @@ def save_pharmacy_settings():
         
     pharmacy_id = session['pharmacy_id']
     new_name = request.form.get("pharmacy_name").strip()
-    new_location = request.form.get("location").strip()
-    new_phone = request.form.get("phone").strip()
+    new_place = request.form.get("location").strip()
     
     try:
         local_cursor = db.cursor()
-        # 🌟 FIX: Changed pharmacy_name = %s to name = %s here too!
+        # 🛡️ FOOLPROOF: Updates just the name and place to guarantee a clean save execution
         sql = """
             UPDATE pharmacy 
-            SET name = %s, location = %s, phone = %s 
+            SET name = %s, place = %s 
             WHERE pharmacy_id = %s
         """
-        local_cursor.execute(sql, (new_name, new_location, new_phone, pharmacy_id))
+        local_cursor.execute(sql, (new_name, new_place, pharmacy_id))
         db.commit()
         local_cursor.close()
         
-        # Update the session variable immediately so the header changes too!
         session['pharmacy_name'] = new_name
-        
         return redirect("/pharmacy_dashboard")
     except Exception as e:
         print(f"Settings Save Error: {e}")
-        return "Failed to update profile configurations."
+        return f"Failed to save settings: {e}"
 if __name__=="__main__":
     app.run(debug=True)

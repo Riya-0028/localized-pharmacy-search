@@ -12,7 +12,7 @@
         <div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 20px; padding: 40px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); max-width: 550px; width: 100%; color: white;">
             
             <h2 style="margin-bottom: 10px; font-weight: bold; text-align: center;">
-                <i class="fas fa-cog style-spin" style="color: #4caf50;"></i> Store Profile Settings
+                <i class="fas fa-cog" style="color: #4caf50;"></i> Store Profile Settings
             </h2>
             <p style="text-align: center; opacity: 0.8; font-size: 14px; margin-bottom: 30px;">
                 Update your public storefront information visible to customers.
@@ -20,18 +20,18 @@
 
             <form action="/save_pharmacy_settings" method="POST">
                 <div style="margin-bottom: 20px;">
-    <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 8px; opacity: 0.9;">Pharmacy Name</label>
-    <input type="text" name="pharmacy_name" value="{{ profile.name }}" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; font-size: 15px;">
-</div>
+                    <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 8px; opacity: 0.9;">Pharmacy Name</label>
+                    <input type="text" name="pharmacy_name" value="{{ profile.name }}" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; font-size: 15px;">
+                </div>
 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 8px; opacity: 0.9;">Store Address / Location</label>
-                    <input type="text" name="location" value="{{ profile.location }}" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; font-size: 15px;">
+                    <input type="text" name="location" value="{{ profile.place }}" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; font-size: 15px;">
                 </div>
 
                 <div style="margin-bottom: 30px;">
                     <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 8px; opacity: 0.9;">Contact Phone Number</label>
-                    <input type="text" name="phone" value="{{ profile.phone }}" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; font-size: 15px;">
+                    <input type="text" name="phone" value="+91 9876543210" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; font-size: 15px;">
                 </div>
 
                 <div style="display: flex; gap: 12px;">
